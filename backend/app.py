@@ -16,11 +16,11 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 app = Flask(__name__)
 app.secret_key = os.urandom(24)
 basedir = os.path.abspath(os.path.dirname(__file__))
-#app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{os.path.join(basedir, "instance", "kidasie.db")}'
-if os.environ.get('RENDER'):
-    app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL').replace('postgres://', 'postgresql://')
-else:
-    app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{os.path.join(basedir, "instance", "kidasie.db")}'
+app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{os.path.join(basedir, "instance", "kidasie.db")}'
+# if os.environ.get('RENDER'):
+#     app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL').replace('postgres://', 'postgresql://')
+# else:
+#     app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{os.path.join(basedir, "instance", "kidasie.db")}'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SESSION_PERMANENT'] = True
 app.config['SESSION_TYPE'] = 'filesystem'
@@ -32,7 +32,7 @@ db = SQLAlchemy(app)
 
 CORS(app, 
      resources={r"/*": {
-         "origins": ["http://localhost:3000", "https://your-vercel-frontend-url.vercel.app"], # needs to be updated
+         "origins": ["http://localhost:3000", "https://your-vercel-frontend-url.vercel.app"],
          "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
          "allow_headers": ["Content-Type", "Authorization"],
          "supports_credentials": True

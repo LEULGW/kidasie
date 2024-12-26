@@ -1,0 +1,89 @@
+/* src/components/Home.css */
+
+.home-page-container {
+    padding: clamp(1rem, 2vw, 2rem);
+    font-family: 'Arial', sans-serif;
+    background-color: #f8f9fa;
+    min-height: 100vh;
+    width: min(90%, 1200px);
+    margin: 0 auto;
+    box-sizing: border-box;
+}
+
+.home-page-title {
+    font-size: clamp(1.75rem, 4vw, 2.5rem);
+    color: #2c3e50;
+    text-align: center;
+    margin-bottom: clamp(1rem, 2vw, 2rem);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.home-page-description {
+    font-size: clamp(1rem, 1.5vw, 1.125rem);
+    color: #34495e;
+    line-height: 1.6;
+    margin-bottom: clamp(1rem, 2vw, 1.25rem);
+    text-align: justify;
+    max-width: 95ch;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.home-page-note {
+    background-color: #fef2c0;
+    padding: clamp(0.75rem, 2vw, 1.5rem);
+    border-radius: 0.5rem;
+    margin-top: clamp(13rem, 25vh, 15rem);
+    margin-bottom: clamp(2rem, 5vh, 4rem);
+    width: 95%;
+    border-left: 4px solid #f39c12;
+    color: #e67e22;
+}
+
+.home-page-note strong {
+    font-weight: 600;
+}
+
+button.learn-more-btn {
+    background-color: #1abc9c;
+    color: white;
+    border: none;
+    padding: clamp(0.5rem, 1.5vw, 1rem) clamp(1rem, 2vw, 1.5rem);
+    border-radius: 0.5rem;
+    cursor: pointer;
+    font-size: clamp(0.875rem, 1.2vw, 1rem);
+    transition: all 0.3s ease;
+    display: block;
+    margin: clamp(1.5rem, 3vw, 2rem) auto 0;
+    width: fit-content;
+    min-width: 120px;
+}
+
+button.learn-more-btn:hover {
+    background-color: #16a085;
+    transform: translateY(-2px);
+}
+
+img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+    margin: 0 auto;
+}
+
+:root {
+    --container-padding: clamp(1rem, 2vw, 2rem);
+    --content-max-width: 1200px;
+}
+
+@media print {
+    .home-page-container {
+        width: 100%;
+        max-width: none;
+        padding: 0;
+    }
+    
+    button.learn-more-btn {
+        display: none;
+    }
+}

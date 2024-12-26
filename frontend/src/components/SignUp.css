@@ -1,0 +1,88 @@
+/* src/components/SignUp.css */
+
+.signup-container {
+    max-width: 600px;
+    margin: auto;
+    padding: 20px;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    margin-top: 50px;
+}
+
+.signup-container h1 {
+    font-size: 2rem;
+    font-weight: bold;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.signup-container form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.signup-container input,
+.signup-container select {
+    padding: 12px;
+    font-size: 1rem;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    outline: none;
+    transition: border-color 0.2s ease;
+}
+
+.signup-container input:focus,
+.signup-container select:focus {
+    border-color: #4C51BF;
+    box-shadow: 0 0 5px rgba(76, 81, 191, 0.2);
+}
+
+.signup-container button {
+    padding: 14px;
+    background-color: #3a4f5d;;
+    color: white;
+    font-size: 1.1rem;
+    font-weight: bold;
+    margin-top: 3rem;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.signup-container button:hover {
+    background-color: #5e7788;
+}
+
+.signup-container select {
+    background-color: #fafafa;
+    cursor: pointer;
+}
+
+@media (max-width: 768px) {
+    .signup-container {
+        max-width: 90%;
+        margin-top: 30px;
+    }
+
+    .signup-container h1 {
+        font-size: 1.5rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .signup-container {
+        padding: 15px;
+    }
+
+    .signup-container input,
+    .signup-container select {
+        font-size: 0.9rem;
+    }
+
+    .signup-container button {
+        font-size: 1rem;
+    }
+}

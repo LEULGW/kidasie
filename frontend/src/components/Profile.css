@@ -1,0 +1,136 @@
+/* Profile.css */
+
+.profile-page .profile-container {
+    padding: clamp(1rem, 2vw, 2rem);
+    font-family: 'Arial', sans-serif;
+    background-color: #f8f9fa;
+    min-height: 100vh;
+    width: min(90%, 1000px);
+    margin: 0 auto;
+    box-sizing: border-box;
+}
+
+.profile-page .profile-header {
+    font-size: clamp(2rem, 3.5vw, 2.5rem);
+    color: #2c3e50;
+    text-align: center;
+    margin-bottom: clamp(1.5rem, 3vw, 2rem);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.profile-page .profile-info-box {
+    background-color: #ffffff;
+    padding: 2rem;
+    border-radius: 1rem;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    margin-bottom: 2rem;
+    text-align: left;
+    max-width: 80%;
+    margin: 0 auto;
+}
+
+.profile-page .profile-info-box p {
+    font-size: 1.2rem;
+    color: #34495e;
+    margin: 1rem 0;
+}
+
+.profile-page .profile-info-box button {
+    background-color: #1abc9c;
+    color: white;
+    border: none;
+    padding: 0.75rem 2rem;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    margin-top: 1.5rem;
+    display: block;
+    width: 100%;
+}
+
+.profile-page .profile-info-box button:hover {
+    background-color: #16a085;
+    transform: translateY(-2px);
+}
+
+.profile-page .profile-edit-container {
+    background-color: #ffffff;
+    padding: 2rem;
+    border-radius: 0.75rem;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    width: min(90%, 800px);
+    margin: 2rem auto;
+    text-align: center;
+}
+
+.profile-page .profile-edit-container input {
+    width: 90%;
+    padding: clamp(0.75rem, 1.5vw, 1rem);
+    margin: clamp(0.5rem, 1vw, 1rem) 0;
+    font-size: 1rem;
+    border: 1px solid #dcdcdc;
+    border-radius: 0.5rem;
+    box-sizing: border-box;
+}
+
+.profile-page .profile-edit-container input:focus {
+    outline: none;
+    border-color: #3a4f5d;
+    box-shadow: 0 0 5px rgba(26, 188, 156, 0.5);
+}
+
+.profile-page button.save-btn,
+.profile-page button.edit-btn {
+    background-color: #3a4f5d;
+    color: white;
+    border: none;
+    padding: clamp(0.75rem, 1.5vw, 1rem) clamp(1.5rem, 3vw, 2rem);
+    border-radius: 0.5rem;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+.profile-page button.save-btn:hover,
+.profile-page button.edit-btn:hover {
+    background-color: #5e7788;
+    transform: translateY(-2px);
+}
+
+@media (max-width: 768px) {
+    .profile-page .profile-edit-container input {
+        width: 100%;
+    }
+
+    .profile-page .profile-container {
+        width: 95%;
+    }
+
+    .profile-page .profile-info-box {
+        width: 95%;
+    }
+}
+
+.profile-page .button-group {
+    display: flex;
+    gap: 5rem;
+    justify-content: center;
+    margin-top: 1.5rem;
+}
+
+.profile-page button.cancel-btn {
+    background-color: #e74c3c;
+    color: white;
+    border: none;
+    padding: clamp(0.75rem, 1.5vw, 1rem) clamp(1.5rem, 3vw, 2rem);
+    border-radius: 0.5rem;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+.profile-page button.cancel-btn:hover {
+    background-color: #c0392b;
+    transform: translateY(-2px);
+}

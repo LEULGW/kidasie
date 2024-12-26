@@ -1,0 +1,82 @@
+/* RecordingList.css */
+
+.recording-list-page .recording-list-container {
+    padding: 16px;
+    max-width: 1200px;
+    margin: 0 auto;
+    font-family: 'Arial', sans-serif;
+}
+
+.recording-list-page .recording-list-container h2 {
+    text-align: center;
+    font-size: 2rem;
+    color: #333;
+    margin-bottom: 20px;
+}
+
+.recording-list-page .recording-list-container ul {
+    padding-left: 0;
+    list-style-type: none;
+}
+
+.recording-list-page .recording-list-container li {
+    background-color: #f9fafb;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease;
+}
+
+.recording-list-page .recording-list-container li:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15);
+}
+
+.recording-list-page .recording-list-container p {
+    font-size: 1.25rem;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 12px;
+}
+
+.recording-list-page .recording-list-container audio {
+    width: 100%;
+    margin-top: 12px;
+}
+
+.recording-list-page .recording-list-container button {
+    display: block;
+    width: 100%;
+    background-color: #3a4f5d;
+    color: white;
+    border: none;
+    padding: 12px;
+    font-size: 1rem;
+    border-radius: 6px;
+    cursor: pointer;
+    margin-top: 20px;
+    transition: background-color 0.3s ease;
+}
+
+.recording-list-page .recording-list-container button:hover {
+    background-color: #5e7788;
+}
+
+@media (max-width: 768px) {
+    .recording-list-page .recording-list-container {
+        padding: 12px;
+    }
+
+    .recording-list-page .recording-list-container h2 {
+        font-size: 1.5rem;
+    }
+
+    .recording-list-page .recording-list-container li {
+        padding: 16px;
+    }
+
+    .recording-list-page .recording-list-container button {
+        padding: 10px;
+        font-size: 0.9rem;
+    }
+}

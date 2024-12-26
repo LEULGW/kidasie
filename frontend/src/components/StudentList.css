@@ -1,0 +1,73 @@
+/* StudentList.css */
+
+.student-list-page .student-list-container {
+    padding: 16px;
+    max-width: 1200px;
+    margin: 0 auto;
+    font-family: 'Arial', sans-serif;
+}
+
+.student-list-page h2 {
+    text-align: center;
+    font-size: 2rem;
+    color: #333;
+    margin-bottom: 20px;
+}
+
+.student-list-page .student-card {
+    background-color: #f9fafb;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    margin-bottom: 16px;
+    transition: transform 0.3s ease;
+}
+
+.student-list-page .student-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15);
+}
+
+.student-list-page .student-card h3 {
+    font-size: 1.5rem;
+    color: #333;
+    margin-bottom: 12px;
+}
+
+.student-list-page .student-card button {
+    background-color: #353a60;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.student-list-page .student-card button:hover {
+    background-color: #7389cc;
+}
+
+.student-list-page p {
+    text-align: center;
+    color: #777;
+    font-size: 1.1rem;
+}
+
+@media (max-width: 768px) {
+    .student-list-page .student-list-container {
+        padding: 12px;
+    }
+
+    .student-list-page .student-card {
+        padding: 16px;
+    }
+
+    .student-list-page .student-card h3 {
+        font-size: 1.25rem;
+    }
+
+    .student-list-page .student-card button {
+        padding: 8px 16px;
+    }
+}

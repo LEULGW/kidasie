@@ -344,9 +344,50 @@ def delete_recording(recording_id):
     db.session.commit()
     return jsonify({"message": "Recording deleted successfully"})
 
+def init_db():
+    with app.app_context():
+        # Create tables
+        db.create_all()
+        
+        # Add users
+        users = [
+            User(email="ermias@gmail.com", password=generate_password_hash("abebe"), 
+                 first_name="Ermias", last_name="Amelga", role="teacher"),
+            User(email="girum@gmail.com", password=generate_password_hash("abebe"), 
+                 first_name="Girum", last_name="Ermias", role="student", teacher_id=1),
+            User(email="teddy@gmail.com", password=generate_password_hash("abebe"), 
+                 first_name="Tewodros", last_name="Kassahun", role="student", teacher_id=1),
+            User(email="amanuel@gmail.com", password=generate_password_hash("abebe"), 
+                 first_name="Amanuel", last_name="Sertse", role="student", teacher_id=1)
+        ]
+        
+        # Only add if users don't exist
+        if not User.query.first():
+            db.session.add_all(users)
+            db.session.commit()
+
+        # Add songs
+        songs_data = [
+            ("Be Aman Ab", "Awgchew"), ("Be Ente Btsue", "Awgchew"),
+            ("Buruk Ke Smu", "Awgchew"), ("Bekeme Mhretke", "Awgchew"),
+            ("Arhewu", "Awgchew"), ("Be Wengel Merahkene", "Awgchew"),
+            ("Egzio", "Awgchew"), ("Emne Beha", "Awgchew"),
+            ("Hale Luya Kumu", "Awgchew"), ("Kidus Hawarya", "Awgchew"),
+            ("Egziota-Etewu", "Awgchew"), ("Kidan", "Awgchew"),
+            ("Leab Weweld", "Awgchew"), ("Menu Yemesleke", "Awgchew"),
+            ("Tesetwo", "Awgchew")
+        ]
+        
+        # Only add if songs don't exist
+        if not Song.query.first():
+            songs = [Song(title=title, artist=artist, file_path=f"songs/{title.lower().replace(' ', '_')}.mp3") 
+                    for title, artist in songs_data]
+            db.session.add_all(songs)
+            db.session.commit()
 
 # Run the app
 if __name__ == "__main__":
+    port = int(os.environ.get('PORT', 10000))
     with app.app_context():
-        db.create_all()
-    app.run(host='0.0.0.0', port=5000)
+        init_db()
+    app.run(host='0.0.0.0', port=port)

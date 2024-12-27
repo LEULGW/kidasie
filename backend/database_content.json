@@ -1,0 +1,152 @@
+{
+  "users": [
+    {
+      "id": 1,
+      "email": "ermias@gmail.com",
+      "password": "pbkdf2:sha256:600000$OTbWzQhugeCsonyc$67be9b7850ad09a35b807fa0d1dac0c46a1478c19aedff521ea53d2b37c4b11d",
+      "first_name": "Ermias",
+      "last_name": "Amelga",
+      "role": "teacher",
+      "teacher_id": null
+    },
+    {
+      "id": 2,
+      "email": "girum@gmail.com",
+      "password": "pbkdf2:sha256:600000$qxeYEEWkyQEK5ebP$5130dbb95e3649ff4849e9077f20a2e1d9a9729f8b7e3e068d0efaf6d178ef73",
+      "first_name": "Girum",
+      "last_name": "Ermias",
+      "role": "student",
+      "teacher_id": 1
+    },
+    {
+      "id": 3,
+      "email": "teddy@gmail.com",
+      "password": "pbkdf2:sha256:600000$3VBoBML8y8lea8I9$02dee62360fa673077889de566f8cbc4fb65ce840b5c9f0651d361004dc972d7",
+      "first_name": "Tewodros",
+      "last_name": "Kassahun",
+      "role": "student",
+      "teacher_id": 1
+    },
+    {
+      "id": 4,
+      "email": "amanuel@gmail.com",
+      "password": "pbkdf2:sha256:600000$EX13k5SaH9rBen8v$76c47ae187585d8cfaaea512430104e3ea94184d0edff88cabdc200aee227f50",
+      "first_name": "Amanuel",
+      "last_name": "Sertse",
+      "role": "student",
+      "teacher_id": 1
+    }
+  ],
+  "songs": [
+    {
+      "id": 1,
+      "title": "Be Aman Ab",
+      "artist": "Awgchew",
+      "file_path": "/static/songs/BAMANE ABE-LEABE WWLEDE.MP3"
+    },
+    {
+      "id": 2,
+      "title": "Be Ente Btsue",
+      "artist": "Awgchew",
+      "file_path": "/static/songs/BE SE BY-BENET BETSUE.wav"
+    },
+    {
+      "id": 3,
+      "title": "Buruk Ke Smu",
+      "artist": "Awgchew",
+      "file_path": "/static/songs/BENET BETSUE-BURUKE SEMU.wav"
+    },
+    {
+      "id": 4,
+      "title": "Bekeme Mhretke",
+      "artist": "Awgchew",
+      "file_path": "/static/songs/BKEM MEHERTEK-EGEZIOTA.MP3"
+    },
+    {
+      "id": 5,
+      "title": "Arhewu",
+      "artist": "Awgchew",
+      "file_path": "/static/songs/BURUKE SEMU-AREHEWU.wav"
+    },
+    {
+      "id": 6,
+      "title": "Be Wengel Merahkene",
+      "artist": "Awgchew",
+      "file_path": "/static/songs/BWNEGYLE MRAHEKN-MNU YEMSELK.MP3"
+    },
+    {
+      "id": 7,
+      "title": "Egzio",
+      "artist": "Awgchew",
+      "file_path": "/static/songs/EGEZIO-ADENENU.wav"
+    },
+    {
+      "id": 8,
+      "title": "Emne Beha",
+      "artist": "Awgchew",
+      "file_path": "/static/songs/EMENE BEHA-BEAMANE ABE.MP3"
+    },
+    {
+      "id": 9,
+      "title": "Hale Luya Kumu",
+      "artist": "Awgchew",
+      "file_path": "/static/songs/HALY LUYAQUMU-TSLEYU BE SLAM BYT KERESETIYANE.wav"
+    },
+    {
+      "id": 10,
+      "title": "Kidus Hawarya",
+      "artist": "Awgchew",
+      "file_path": "/static/songs/KEDUSE AWAREYA-KIDANE.MP3"
+    },
+    {
+      "id": 11,
+      "title": "Egziota-Etewu",
+      "artist": "Awgchew",
+      "file_path": "/static/songs/KEGEZIOTA-ETEWU.MP3"
+    },
+    {
+      "id": 12,
+      "title": "Kidan",
+      "artist": "Awgchew",
+      "file_path": "/static/songs/KIDANE -BEWNEGYLE MERAHEKN.MP3"
+    },
+    {
+      "id": 13,
+      "title": "Leab Weweld",
+      "artist": "Awgchew",
+      "file_path": "/static/songs/LABE WWLEE-KEDUSE-HAWAREYA.MP3"
+    },
+    {
+      "id": 14,
+      "title": "Menu Yemesleke",
+      "artist": "Awgchew",
+      "file_path": "/static/songs/MNU YEMSELK-AMKENEYO.MP3"
+    },
+    {
+      "id": 15,
+      "title": "Tesetwo",
+      "artist": "Awgchew",
+      "file_path": "/static/songs/TESTEWO ZKE  HAWA BENET BETSHU-BKM MEHERTEK.MP3"
+    }
+  ],
+  "recordings": [
+    {
+      "id": 1,
+      "user_id": 2,
+      "song_id": 1,
+      "file_path": "static/recordings/user_2_song_1.webm"
+    },
+    {
+      "id": 2,
+      "user_id": 3,
+      "song_id": 1,
+      "file_path": "static/recordings/user_3_song_1.webm"
+    },
+    {
+      "id": 3,
+      "user_id": 4,
+      "song_id": 1,
+      "file_path": "static/recordings/user_4_song_1.webm"
+    }
+  ]
+}

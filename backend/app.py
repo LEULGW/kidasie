@@ -28,7 +28,10 @@ db = SQLAlchemy(app)
 
 CORS(app, 
      resources={r"/*": {
-         "origins": ["http://localhost:3000", "https://your-vercel-frontend-url.vercel.app"],
+         "origins": [
+             "http://localhost:3000", 
+             "https://kidasie-frontend-9v4z4besx-leulgws-projects.vercel.app"
+         ],
          "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
          "allow_headers": ["Content-Type", "Authorization"],
          "supports_credentials": True

@@ -11,7 +11,7 @@ const SongList = () => {
     useEffect(() => {
         const fetchSongs = async () => {
             try {
-            const response = await axios.get('http://localhost:5000/songs', {
+            const response = await axios.get(`${process.env.REACT_APP_API_URL}/songs`, {
                 withCredentials: true,
                 headers: {
                     'Content-Type': 'application/json',

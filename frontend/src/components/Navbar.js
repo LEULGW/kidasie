@@ -9,7 +9,7 @@ const Navbar = ({ isLoggedIn, setIsLoggedIn }) => {
 
     const handleLogout = async () => {
         try {
-            await axios.post('http://localhost:5000/logout', {}, {
+            await axios.post(`${process.env.REACT_APP_API_URL}/logout`, {}, {
                 withCredentials: true
             });
             sessionStorage.removeItem('user_id');

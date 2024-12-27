@@ -16,7 +16,7 @@ const SongDetail = () => {
 
     const fetchSongDetails = async () => {
         try {
-            const response = await axios.get(`http://localhost:5000/songs/${songId}`, {
+            const response = await axios.get(`${process.env.REACT_APP_API_URL}/songs/${songId}`, {
                 withCredentials: true
             });
             setSong(response.data);
@@ -60,7 +60,7 @@ const SongDetail = () => {
                 formData.append('user_id', userId);
 
                 try {
-                    const response = await axios.post('http://localhost:5000/recordings', formData, {
+                    const response = await axios.post(`${process.env.REACT_APP_API_URL}/recordings`, formData, {
                         headers: {
                             'Content-Type': 'multipart/form-data',
                         },
@@ -91,7 +91,7 @@ const SongDetail = () => {
 
     const deleteRecording = async (recordingId) => {
         try {
-            await axios.delete(`http://localhost:5000/recordings/${recordingId}`, { withCredentials: true });
+            await axios.delete(`${process.env.REACT_APP_API_URL}/recordings/${recordingId}`, { withCredentials: true });
             alert('Recording deleted successfully');
             setSong(prevSong => ({
                 ...prevSong,
@@ -117,7 +117,7 @@ const SongDetail = () => {
                             <p>Student: {recording.user_name}</p>
                         )}
                         <audio controls className="songdetail-audio">
-                            <source src={`http://localhost:5000/${recording.file_path}`} type="audio/mpeg" />
+                            <source src={`${process.env.REACT_APP_API_URL}/${recording.file_path}`} type="audio/mpeg" />
                             Your browser does not support the audio element.
                         </audio>
                         {song.user_role !== 'teacher' && song.user_role !== 'parent' && (
@@ -143,7 +143,7 @@ const SongDetail = () => {
                     <div>
                         <h3>Original Song:</h3>
                         <audio controls className="songdetail-audio">
-                            <source src={`http://localhost:5000/${song.file_path}`} type="audio/mpeg" />
+                            <source src={`${process.env.REACT_APP_API_URL}/${song.file_path}`} type="audio/mpeg" />
                             Your browser does not support the audio element.
                         </audio>
                     </div>

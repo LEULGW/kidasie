@@ -14,7 +14,7 @@ const RecordingList = () => {
         const fetchRecordings = async () => {
             try {
                 const response = await axios.get(
-                    `http://localhost:5000/recordings/${studentId}`,
+                    `${process.env.REACT_APP_API_URL}/recordings/${studentId}`,
                     { withCredentials: true }
                 );
                 console.log('Recordings data:', response.data);

@@ -16,7 +16,7 @@ const SignUp = () => {
 
     useEffect(() => {
         if (role === 'student') {
-            axios.get('http://localhost:5000/teachers', { withCredentials: true })
+            axios.get(`${process.env.REACT_APP_API_URL}/teachers`, { withCredentials: true })
                 .then(response => {
                     setTeachers(response.data);
                 })
@@ -39,7 +39,7 @@ const SignUp = () => {
                 teacher_id: role === 'student' ? teacherId : null
             };
 
-            const response = await axios.post('http://localhost:5000/signup', signupData, {
+            const response = await axios.post(`${process.env.REACT_APP_API_URL}/signup`, signupData, {
                 withCredentials: true
             });            
     

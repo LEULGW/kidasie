@@ -8,7 +8,7 @@ const StudentList = () => {
     const [students, setStudents] = useState([]);
 
     useEffect(() => {
-        axios.get('http://localhost:5000/students', { withCredentials: true })
+        axios.get(`${process.env.REACT_APP_API_URL}/students`, { withCredentials: true })
             .then(response => {
                 setStudents(response.data);
             })

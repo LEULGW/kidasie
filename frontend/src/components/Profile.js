@@ -17,7 +17,7 @@ const Profile = () => {
     useEffect(() => {
         const fetchProfile = async () => {
             try {
-                const response = await axios.get('http://localhost:5000/profile', { withCredentials: true });
+                const response = await axios.get(`${process.env.REACT_APP_API_URL}/profile`, { withCredentials: true });
                 setProfile(response.data);
                 setUpdatedProfile({
                     first_name: response.data.first_name,
@@ -40,9 +40,9 @@ const Profile = () => {
 
     const saveChanges = async () => {
         try {
-            await axios.put('http://localhost:5000/profile', updatedProfile, { withCredentials: true });
+            await axios.put(`${process.env.REACT_APP_API_URL}/profile`, updatedProfile, { withCredentials: true });
             alert('Profile updated successfully!');
-            const response = await axios.get('http://localhost:5000/profile', { withCredentials: true });
+            const response = await axios.get(`${process.env.REACT_APP_API_URL}/profile`, { withCredentials: true });
             setProfile(response.data);
             setEditMode(false);
         } catch (error) {

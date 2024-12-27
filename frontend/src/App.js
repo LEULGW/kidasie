@@ -12,6 +12,7 @@ import RecordingList from './components/RecordingList';
 import axios from 'axios';
 
 axios.defaults.withCredentials = true;
+axios.defaults.baseURL = process.env.REACT_APP_API_URL;
 
 function App() {
     const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -22,9 +23,7 @@ function App() {
 
         const checkLoginStatus = async () => {
             try {
-                const response = await axios.get('http://localhost:5000/check-session', {
-                    withCredentials: true
-                });
+                const response = await axios.get('/check-session');
                 if (response.data.isLoggedIn) {
                     localStorage.setItem('user_id', response.data.userId);
                     setIsLoggedIn(true);

@@ -29,8 +29,9 @@ db = SQLAlchemy(app)
 CORS(app, 
      resources={r"/*": {
          "origins": [
-             "http://localhost:3000", 
-             "https://kidasie-frontend-9v4z4besx-leulgws-projects.vercel.app"
+             "http://localhost:3000",
+             "https://kidasie-frontend.vercel.app",
+             "https://kidasie-backend.onrender.com"
          ],
          "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
          "allow_headers": ["Content-Type", "Authorization"],
@@ -185,7 +186,7 @@ def get_recordings_by_student(student_id):
         "id": rec.id,
         "song_id": rec.song_id,
         "song_title": rec.song.title,
-        "audio_url": f"http://localhost:5000/{rec.file_path}"
+        "file_path": rec.file_path
     } for rec in recordings])
 
 

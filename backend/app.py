@@ -30,25 +30,37 @@ app.config['SESSION_COOKIE_NAME'] = 'kidasie_session'
 
 db = SQLAlchemy(app)
 
-CORS(app, 
+CORS(app,
      resources={r"/*": {
          "origins": [
-            #  "http://localhost:3000",
-            #  "http://localhost:10000",
              "https://kidasie-frontend.vercel.app",
              "https://kidasie-backend.onrender.com"
          ],
          "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-         "allow_headers": ["Content-Type", "Authorization"],
+         "allow_headers": [
+             "Content-Type",
+             "Authorization",
+             "access-control-allow-credentials"
+         ],
          "supports_credentials": True,
          "expose_headers": ["Set-Cookie"]
-     }}, 
+     }},
      supports_credentials=True)
 
 # Root route (index page)
 @app.route('/')
 def index():
     return "Welcome to the Kidasie backend app!"
+
+@app.route('/<path:path>', methods=['OPTIONS'])
+def handle_options(path):
+    response = jsonify({'message': 'CORS preflight successful'})
+    response.headers.add('Access-Control-Allow-Origin', 'https://kidasie-frontend.vercel.app')
+    response.headers.add('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS')
+    response.headers.add('Access-Control-Allow-Headers', 'Content-Type, Authorization, access-control-allow-credentials')
+    response.headers.add('Access-Control-Allow-Credentials', 'true')
+    return response
+
 
 # User model
 class User(db.Model):
@@ -231,7 +243,10 @@ def check_session():
 
 @app.after_request
 def after_request(response):
+    response.headers.add('Access-Control-Allow-Origin', 'https://kidasie-frontend.vercel.app')
+    response.headers.add('Access-Control-Allow-Credentials', 'true')
     return response
+
 
 # Song model (mock songs)
 class Song(db.Model):

@@ -20,8 +20,10 @@ app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{os.path.join(basedir, "inst
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SESSION_PERMANENT'] = True
 app.config['SESSION_TYPE'] = 'filesystem'
-app.config['SESSION_COOKIE_SAMESITE'] = "Lax"
-app.config['SESSION_COOKIE_SECURE'] = False  # Set to True in production
+app.config['SESSION_COOKIE_SAMESITE'] = 'None'
+app.config['SESSION_COOKIE_SECURE'] = True
+app.config['SESSION_COOKIE_DOMAIN'] = 'onrender.com'
+app.config[' SESSION_COOKIE_HTTPONLY']= True
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 db = SQLAlchemy(app)
@@ -30,12 +32,13 @@ CORS(app,
      resources={r"/*": {
          "origins": [
              "http://localhost:3000",
-             "https://kidasie-frontend.vercel.app",
-             "https://kidasie-backend.onrender.com"
+             "http://localhost:10000",
+             "https://kidasie-frontend.vercel.app"
          ],
          "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
          "allow_headers": ["Content-Type", "Authorization"],
-         "supports_credentials": True
+         "supports_credentials": True,
+         "expose_headers": ["Set-Cookie"]
      }}, 
      supports_credentials=True)
 
@@ -103,7 +106,7 @@ def login():
         response_data = {
             "message": "Login successful",
             "role": user.role,
-            "user_id": str(user.id)
+            "user_id": user.id
         }
         print("Sending response:", response_data)
         return jsonify(response_data), 200
@@ -216,12 +219,17 @@ def check_session():
     if 'user_id' in session:
         return jsonify({
             'isLoggedIn': True,
-            'userId': session['user_id']
+            'userId': session['user_id'],
+            'role': User.query.get(session['user_id']).role
         })
     return jsonify({
         'isLoggedIn': False
     }), 401
 
+@app.after_request
+def after_request(response):
+    response.headers.add('Access-Control-Allow-Credentials', 'true')
+    return response
 
 # Song model (mock songs)
 class Song(db.Model):

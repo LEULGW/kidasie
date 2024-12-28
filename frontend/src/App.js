@@ -12,7 +12,7 @@ import RecordingList from './components/RecordingList';
 import axios from 'axios';
 
 axios.defaults.withCredentials = true;
-axios.defaults.baseURL = process.env.REACT_APP_API_URL;
+axios.defaults.headers.common['Content-Type'] = 'application/json';
 
 function App() {
     const [isLoggedIn, setIsLoggedIn] = useState(false);

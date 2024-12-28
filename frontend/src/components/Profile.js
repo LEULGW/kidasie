@@ -17,7 +17,12 @@ const Profile = () => {
     useEffect(() => {
         const fetchProfile = async () => {
             try {
-                const response = await axios.get(`${process.env.REACT_APP_API_URL}/profile`, { withCredentials: true });
+                const response = await axios.get(`${process.env.REACT_APP_API_URL}/profile`, { 
+                    withCredentials: true, 
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
                 setProfile(response.data);
                 setUpdatedProfile({
                     first_name: response.data.first_name,

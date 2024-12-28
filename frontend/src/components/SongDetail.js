@@ -17,7 +17,10 @@ const SongDetail = () => {
     const fetchSongDetails = async () => {
         try {
             const response = await axios.get(`${process.env.REACT_APP_API_URL}/songs/${songId}`, {
-                withCredentials: true
+                withCredentials: true,
+                headers: {
+                    'Content-Type': 'application/json'
+                }
             });
             setSong(response.data);
         } catch (error) {

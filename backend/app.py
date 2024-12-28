@@ -32,17 +32,12 @@ db = SQLAlchemy(app)
 
 CORS(app,
      resources={r"/*": {
-         "origins": [
-             "https://kidasie-frontend.vercel.app",
-             "https://kidasie-backend.onrender.com"
-         ],
+         "origins": ["https://kidasie-frontend.vercel.app"],
          "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-         "allow_headers": [
-             "Content-Type",
-             "Authorization",
-         ],
+         "allow_headers": ["Content-Type", "Authorization", "Access-Control-Allow-Credentials"],
          "supports_credentials": True,
-         "expose_headers": ["Set-Cookie"]
+         "expose_headers": ["Content-Type", "Authorization"],
+         "max_age": 600
      }},
      supports_credentials=True)
 
@@ -242,8 +237,12 @@ def check_session():
 
 @app.after_request
 def after_request(response):
-    response.headers.add('Access-Control-Allow-Origin', 'https://kidasie-frontend.vercel.app')
-    response.headers.add('Access-Control-Allow-Credentials', 'true')
+    origin = request.headers.get('Origin')
+    if origin == 'https://kidasie-frontend.vercel.app':
+        response.headers.add('Access-Control-Allow-Origin', origin)
+        response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization,Access-Control-Allow-Credentials')
+        response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS')
+        response.headers.add('Access-Control-Allow-Credentials', 'true')
     return response
 
 

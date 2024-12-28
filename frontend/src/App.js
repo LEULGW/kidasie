@@ -12,8 +12,6 @@ import RecordingList from './components/RecordingList';
 import axios from 'axios';
 
 axios.defaults.withCredentials = true;
-axios.defaults.headers.common['Content-Type'] = 'application/json';
-axios.defaults.headers.common['Access-Control-Allow-Credentials'] = true;
 
 const API_URL = process.env.REACT_APP_API_URL || 'https://kidasie-backend.onrender.com';
 

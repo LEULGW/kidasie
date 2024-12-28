@@ -27,25 +27,14 @@ const Login = ({ setIsLoggedIn }) => {
                     'Content-Type': 'application/json'
                 }
             });
-
+    
             if (response.data.message === 'Login successful' && response.data.user_id) {
                 localStorage.setItem('user_id', response.data.user_id);
                 setIsLoggedIn(true);
-                
-                const sessionCheck = await axios.get(`${API_URL}/check-session`, {
-                    withCredentials: true
-                });
-                
-                if (sessionCheck.data.isLoggedIn) {
-                    navigate('/profile');
-                } else {
-                    throw new Error('Session not established');
-                }
+                navigate('/profile');
             }
         } catch (error) {
             console.error('Login error:', error);
-            localStorage.removeItem('user_id');
-            setIsLoggedIn(false);
             alert('Login failed: ' + (error.response?.data?.message || 'Please try again'));
         }
     };

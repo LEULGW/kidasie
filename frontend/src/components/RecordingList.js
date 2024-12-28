@@ -7,26 +7,48 @@ import './RecordingList.css';
 const RecordingList = () => {
     const { studentId } = useParams();
     const [recordings, setRecordings] = useState([]);
+    const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const navigate = useNavigate();
 
     useEffect(() => {
         const fetchRecordings = async () => {
             try {
+                const userId = localStorage.getItem('user_id');
+                if (!userId) {
+                    navigate('/login');
+                    return;
+                }
+
                 const response = await axios.get(
                     `${process.env.REACT_APP_API_URL}/recordings/${studentId}`,
-                    { withCredentials: true }
+                    {
+                        withCredentials: true,
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    }
                 );
-                console.log('Recordings data:', response.data);
+                
                 setRecordings(response.data);
+                setLoading(false);
             } catch (error) {
-                console.error("Failed to fetch recordings", error);
-                setError(error.message);
+                console.error("Failed to fetch recordings:", error);
+                if (error.response?.status === 401) {
+                    navigate('/login');
+                } else {
+                    setError("Failed to load recordings. Please try again later.");
+                }
+                setLoading(false);
             }
         };
 
         fetchRecordings();
-    }, [studentId]);
+    }, [studentId, navigate]);
+
+    if (loading) {
+        return <div className="recordings-page">Loading...</div>;
+    }
 
     if (error) {
         return <div>Error loading recordings: {error}</div>;

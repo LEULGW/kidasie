@@ -44,6 +44,28 @@ const StudentList = () => {
         fetchStudents();
     }, [navigate]);
     
+    if (loading) {
+        return (
+            <div className="student-list-page">
+                <div className="student-list-container">
+                    <h2>My Students</h2>
+                    <p>Loading students...</p>
+                </div>
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="student-list-page">
+                <div className="student-list-container">
+                    <h2>My Students</h2>
+                    <p className="error-message">{error}</p>
+                </div>
+            </div>
+        );
+    }
+
     return (
         <div className="student-list-page">
             <div className="student-list-container">

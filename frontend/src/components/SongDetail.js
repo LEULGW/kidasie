@@ -16,6 +16,12 @@ const SongDetail = () => {
 
     const fetchSongDetails = async () => {
         try {
+            const userId = localStorage.getItem('user_id');
+            if (!userId) {
+                navigate('/login');
+                return;
+            }
+    
             const response = await axios.get(`${process.env.REACT_APP_API_URL}/songs/${songId}`, {
                 withCredentials: true,
                 headers: {
@@ -25,12 +31,17 @@ const SongDetail = () => {
             setSong(response.data);
         } catch (error) {
             console.error("Error fetching song details:", error);
+            if (error.response?.status === 401) {
+                navigate('/login');
+            } else {
+                alert('Error loading song details. Please try again.');
+            }
         }
     };
 
     useEffect(() => {
         fetchSongDetails();
-    }, [songId, fetchSongDetails]);
+    }, [songId, navigate]);
 
     const startRecording = async () => {
         const userId = localStorage.getItem("user_id");

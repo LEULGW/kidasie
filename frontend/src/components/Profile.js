@@ -17,7 +17,12 @@ const Profile = () => {
     useEffect(() => {
         const fetchProfile = async () => {
             try {
-                const response =  await axios.get('/profile');
+                const response = await axios.get(`${process.env.REACT_APP_API_URL}/profile`, {
+                    withCredentials: true,
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
                 setProfile(response.data);
                 setUpdatedProfile({
                     first_name: response.data.first_name,
@@ -27,7 +32,12 @@ const Profile = () => {
                 });
             } catch (error) {
                 console.error("Error fetching profile:", error);
-                alert('Failed to fetch profile. Please log in again.');
+                if (error.response?.status === 401) {
+                    // Redirect to login if unauthorized
+                    window.location.href = '/login';
+                } else {
+                    alert('Failed to fetch profile. Please try again.');
+                }
             }
         };
         fetchProfile();

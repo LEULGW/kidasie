@@ -151,6 +151,9 @@ def get_students():
         return jsonify({"message": "Not logged in"}), 401
 
     user = User.query.get(session['user_id'])
+    if not user:
+        return jsonify({"message": "User not found"}), 404
+        
     if user.role not in ['teacher', 'parent']:
         return jsonify({"message": "Access denied"}), 403
 

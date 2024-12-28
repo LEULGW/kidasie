@@ -8,15 +8,39 @@ const StudentList = () => {
     const [students, setStudents] = useState([]);
 
     useEffect(() => {
-        axios.get(`${process.env.REACT_APP_API_URL}/students`, { withCredentials: true })
-            .then(response => {
-                setStudents(response.data);
-            })
-            .catch(error => {
-                console.error("Failed to fetch students", error);
-            });
-    }, []);
+        const fetchStudents = async () => {
+            try {
+                const userId = localStorage.getItem('user_id');
+                if (!userId) {
+                    navigate('/login');
+                    return;
+                }
 
+                const response = await axios.get(`${process.env.REACT_APP_API_URL}/students`, {
+                    withCredentials: true,
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                setStudents(response.data);
+                setLoading(false);
+            } catch (error) {
+                console.error("Failed to fetch students:", error);
+                if (error.response?.status === 401) {
+                    navigate('/login');
+                } else if (error.response?.status === 403) {
+                    setError("You don't have permission to view students.");
+                } else {
+                    setError("Failed to load students. Please try again later.");
+                }
+                setLoading(false);
+            }
+        };
+
+        fetchStudents();
+    }, [navigate]);
+    
     return (
         <div className="student-list-page">
             <div className="student-list-container">

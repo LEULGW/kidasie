@@ -30,7 +30,12 @@ const RecordingList = () => {
                     }
                 );
                 
-                setRecordings(response.data);
+                const transformedRecordings = response.data.map(rec => ({
+                    ...rec,
+                    audio_url: `${process.env.REACT_APP_API_URL}/${rec.file_path}`
+                }));
+                
+                setRecordings(transformedRecordings);
                 setLoading(false);
             } catch (error) {
                 console.error("Failed to fetch recordings:", error);

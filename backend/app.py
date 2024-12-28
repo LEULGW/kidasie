@@ -40,7 +40,6 @@ CORS(app,
          "allow_headers": [
              "Content-Type",
              "Authorization",
-             "access-control-allow-credentials"
          ],
          "supports_credentials": True,
          "expose_headers": ["Set-Cookie"]
@@ -57,7 +56,7 @@ def handle_options(path):
     response = jsonify({'message': 'CORS preflight successful'})
     response.headers.add('Access-Control-Allow-Origin', 'https://kidasie-frontend.vercel.app')
     response.headers.add('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS')
-    response.headers.add('Access-Control-Allow-Headers', 'Content-Type, Authorization, access-control-allow-credentials')
+    response.headers.add('Access-Control-Allow-Headers', 'Content-Type, Authorization')
     response.headers.add('Access-Control-Allow-Credentials', 'true')
     return response
 

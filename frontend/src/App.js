@@ -11,6 +11,7 @@ import StudentList from './components/StudentList';
 import RecordingList from './components/RecordingList';
 import axios from 'axios';
 
+axios.defaults.baseURL = 'https://kidasie-backend.onrender.com';
 axios.defaults.withCredentials = true;
 axios.defaults.headers.common['Content-Type'] = 'application/json';
 

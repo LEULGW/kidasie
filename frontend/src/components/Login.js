@@ -20,7 +20,10 @@ const Login = ({ setIsLoggedIn }) => {
                 email,
                 password
             }, {
-                withCredentials: true
+                withCredentials: true,
+                headers: {
+                    'Content-Type': 'application/json'
+                }
             });
 
             if (response.data.message === 'Login successful' && response.data.user_id) {

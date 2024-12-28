@@ -33,7 +33,8 @@ CORS(app,
          "origins": [
              "http://localhost:3000",
              "http://localhost:10000",
-             "https://kidasie-frontend.vercel.app"
+             "https://kidasie-frontend.vercel.app",
+             "https://kidasie-backend.onrender.com"
          ],
          "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
          "allow_headers": ["Content-Type", "Authorization"],
@@ -228,7 +229,6 @@ def check_session():
 
 @app.after_request
 def after_request(response):
-    response.headers.add('Access-Control-Allow-Credentials', 'true')
     return response
 
 # Song model (mock songs)

@@ -7,6 +7,7 @@ from flask_cors import CORS
 from waitress import serve
 from werkzeug.utils import secure_filename
 import os
+from datetime import timedelta
 
 
 basedir = os.path.abspath(os.path.dirname(__file__))
@@ -22,17 +23,18 @@ app.config['SESSION_PERMANENT'] = True
 app.config['SESSION_TYPE'] = 'filesystem'
 app.config['SESSION_COOKIE_SAMESITE'] = 'None'
 app.config['SESSION_COOKIE_SECURE'] = True
-app.config['SESSION_COOKIE_DOMAIN'] = 'onrender.com'
 app.config[' SESSION_COOKIE_HTTPONLY']= True
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=1)
+app.config['SESSION_COOKIE_NAME'] = 'kidasie_session'
 
 db = SQLAlchemy(app)
 
 CORS(app, 
      resources={r"/*": {
          "origins": [
-             "http://localhost:3000",
-             "http://localhost:10000",
+            #  "http://localhost:3000",
+            #  "http://localhost:10000",
              "https://kidasie-frontend.vercel.app",
              "https://kidasie-backend.onrender.com"
          ],

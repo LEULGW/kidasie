@@ -16,7 +16,7 @@ const Login = ({ setIsLoggedIn }) => {
     const handleLogin = async (e) => {
         e.preventDefault();
         try {
-            const response = await axios.post(`${process.env.REACT_APP_API_URL}/login`, {
+            const response = await axios.post('/login', {
                 email,
                 password
             }, {
@@ -30,8 +30,12 @@ const Login = ({ setIsLoggedIn }) => {
                 localStorage.setItem('user_id', response.data.user_id);
                 setIsLoggedIn(true);
                 navigate('/profile');
-            } else {
-                throw new Error('Invalid login response');
+                const sessionCheck = await axios.get('/check-session');
+                if (sessionCheck.data.isLoggedIn) {
+                    navigate('/profile');
+                } else {
+                    throw new Error('Session not established');
+                }
             }
         } catch (error) {
             console.error('Login error:', error);

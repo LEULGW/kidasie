@@ -15,6 +15,8 @@ axios.defaults.withCredentials = true;
 axios.defaults.headers.common['Content-Type'] = 'application/json';
 axios.defaults.headers.common['Access-Control-Allow-Credentials'] = true;
 
+const API_URL = process.env.REACT_APP_API_URL || 'https://kidasie-backend.onrender.com';
+
 function App() {
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     
@@ -24,7 +26,9 @@ function App() {
 
         const checkLoginStatus = async () => {
             try {
-                const response = await axios.get('/check-session');
+                const response = await axios.get(`${API_URL}/check-session`, {
+                    withCredentials: true
+                });
                 if (response.data.isLoggedIn) {
                     localStorage.setItem('user_id', response.data.userId);
                     setIsLoggedIn(true);

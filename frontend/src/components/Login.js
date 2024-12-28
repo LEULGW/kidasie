@@ -8,6 +8,8 @@ const Login = ({ setIsLoggedIn }) => {
     const [password, setPassword] = useState('');
     const navigate = useNavigate();
 
+    const API_URL = process.env.REACT_APP_API_URL || 'https://kidasie-backend.onrender.com';
+
     useEffect(() => {
         localStorage.removeItem('user_id');
         setIsLoggedIn(false);
@@ -16,7 +18,7 @@ const Login = ({ setIsLoggedIn }) => {
     const handleLogin = async (e) => {
         e.preventDefault();
         try {
-            const response = await axios.post('/login', {
+            const response = await axios.post(`${API_URL}/login`, {
                 email,
                 password
             }, {
@@ -29,8 +31,11 @@ const Login = ({ setIsLoggedIn }) => {
             if (response.data.message === 'Login successful' && response.data.user_id) {
                 localStorage.setItem('user_id', response.data.user_id);
                 setIsLoggedIn(true);
-                navigate('/profile');
-                const sessionCheck = await axios.get('/check-session');
+                
+                const sessionCheck = await axios.get(`${API_URL}/check-session`, {
+                    withCredentials: true
+                });
+                
                 if (sessionCheck.data.isLoggedIn) {
                     navigate('/profile');
                 } else {

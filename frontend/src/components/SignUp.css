@@ -86,3 +86,11 @@
         font-size: 1rem;
     }
 }
+/* teacher dropdown */
+.signup-container select {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    position: relative !important;
+    z-index: 100 !important;
+}

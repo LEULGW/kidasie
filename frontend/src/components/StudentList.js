@@ -10,6 +10,10 @@ const StudentList = () => {
     const [error, setError] = useState(null);
     const navigate = useNavigate();
 
+    // NEW: teachers + selected teacher
+    const [teachers, setTeachers] = useState([]);
+    const [selectedTeacher, setSelectedTeacher] = useState("");
+
     useEffect(() => {
         const fetchStudents = async () => {
             try {
@@ -43,7 +47,24 @@ const StudentList = () => {
 
         fetchStudents();
     }, [navigate]);
-    
+
+    // NEW: fetch teachers
+    useEffect(() => {
+        const fetchTeachers = async () => {
+            try {
+                const response = await axios.get(`${process.env.REACT_APP_API_URL}/teachers`, {
+                    withCredentials: true,
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                setTeachers(response.data);
+            } catch (err) {
+                console.error("Failed to fetch teachers:", err);
+            }
+        };
+
+        fetchTeachers();
+    }, []);
+
     if (loading) {
         return (
             <div className="student-list-page">
@@ -66,12 +87,38 @@ const StudentList = () => {
         );
     }
 
+    //  filter students by teacher
+    const filteredStudents = selectedTeacher
+        ? students.filter(s => s.teacher_id === parseInt(selectedTeacher))
+        : students;
+
     return (
         <div className="student-list-page">
             <div className="student-list-container">
                 <h2>My Students</h2>
-                {students.length > 0 ? (
-                    students.map(student => (
+
+                {/* NEW: Teacher dropdown */}
+                {teachers.length > 0 && (
+                    <div className="teacher-filter">
+                        <label htmlFor="teacherSelect">Filter by Teacher:</label>
+                        <select
+                            id="teacherSelect"
+                            value={selectedTeacher}
+                            onChange={(e) => setSelectedTeacher(e.target.value)}
+                        >
+                            <option value="">All Teachers</option>
+                            {teachers.map(teacher => (
+                                <option key={teacher.id} value={teacher.id}>
+                                    {teacher.name}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+                )}
+
+                {/* UPDATED: using filteredStudents */}
+                {filteredStudents.length > 0 ? (
+                    filteredStudents.map(student => (
                         <div key={student.id} className="student-card">
                             <h3>{student.name}</h3>
                             <Link to={`/recordings/${student.id}`}>
@@ -88,3 +135,4 @@ const StudentList = () => {
 };
 
 export default StudentList;
+

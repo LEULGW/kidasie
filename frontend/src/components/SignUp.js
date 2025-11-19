@@ -14,6 +14,7 @@ const SignUp = () => {
     const [teachers, setTeachers] = useState([]);
     const navigate = useNavigate();
 
+    // Load teachers only if role is student
     useEffect(() => {
         if (role === 'student') {
             axios.get(`${process.env.REACT_APP_API_URL}/teachers`, { withCredentials: true })
@@ -41,7 +42,7 @@ const SignUp = () => {
 
             const response = await axios.post(`${process.env.REACT_APP_API_URL}/signup`, signupData, {
                 withCredentials: true
-            });            
+            });
     
             if (response.data.message === 'User created successfully!') {
                 alert('Sign up successful! You can now log in.');
@@ -77,12 +78,12 @@ const SignUp = () => {
 
                 {role === 'student' && (
                     <div>
-                        <label>Select Teacher/Parent: </label>
+                        <label>Select Teacher/Parent:</label>
                         <select value={teacherId} onChange={(e) => setTeacherId(e.target.value)} required>
                             <option value="">Select a Teacher/Parent</option>
                             {teachers.map(teacher => (
                                 <option key={teacher.id} value={teacher.id}>
-                                    {teacher.name} ({teacher.role})
+                                    {teacher.first_name} {teacher.last_name} ({teacher.role})
                                 </option>
                             ))}
                         </select>

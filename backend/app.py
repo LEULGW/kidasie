@@ -24,7 +24,7 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 db = SQLAlchemy(app)
 
-CORS(app, origins=["https://kidasie-frontend.vercel.app"], supports_credentials=True)
+CORS(app, origins=["https://kidasie-frontend.vercel.app", "http://localhost:3000"], supports_credentials=True)
 
 @app.route('/')
 def index():

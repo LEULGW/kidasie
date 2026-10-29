@@ -1,8 +1,6 @@
-// src/components/SignUp.js
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 import { useNavigate, Link } from 'react-router-dom';
-import './SignUp.css';
+import axios, { API_URL } from '../api';
 
 const SignUp = () => {
     const [firstName, setFirstName] = useState('');
@@ -14,90 +12,62 @@ const SignUp = () => {
     const [teachers, setTeachers] = useState([]);
     const navigate = useNavigate();
 
-    // Load teachers only if role is student
     useEffect(() => {
-        if (role === 'student') {
-            axios.get(`${process.env.REACT_APP_API_URL}/teachers`, { withCredentials: true })
-                .then(response => {
-                    setTeachers(response.data);
-                })
-                .catch(error => {
-                    console.error("Failed to fetch teachers", error);
-                });
-        }
-    }, [role]);
+        axios.get(`${API_URL}/teachers`)
+            .then(res => setTeachers(res.data))
+            .catch(error => console.error('Failed to fetch teachers', error));
+    }, []);
 
     const handleSignUp = async (e) => {
         e.preventDefault();
-    
         try {
-            const signupData = {
+            await axios.post(`${API_URL}/signup`, {
                 first_name: firstName,
                 last_name: lastName,
                 email,
                 password,
                 role,
                 teacher_id: role === 'student' ? teacherId : null
-            };
-
-            const response = await axios.post(`${process.env.REACT_APP_API_URL}/signup`, signupData, {
-                withCredentials: true
             });
-    
-            if (response.data.message === 'User created successfully!') {
-                alert('Sign up successful! You can now log in.');
-                navigate('/login');
-            }
+            alert('Sign up successful! You can now log in.');
+            navigate('/login');
         } catch (error) {
-            alert('Error during sign up: ' + (error.response?.data.message || error.message));
+            alert('Error during sign up: ' + (error.response?.data?.message || error.message));
         }
-    }
+    };
 
     return (
-        <div className="signup-container">
+        <div style={{ padding: 20, maxWidth: 400 }}>
             <h1>Sign Up</h1>
             <form onSubmit={handleSignUp}>
-                <label>First Name:</label>
-                <input type="text" value={firstName} onChange={(e) => setFirstName(e.target.value)} required />
-                
-                <label>Last Name:</label>
-                <input type="text" value={lastName} onChange={(e) => setLastName(e.target.value)} required />
-
-                <label>Email:</label>
-                <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
-                
-                <label>Password:</label>
-                <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
-                
-                <label>Role:</label>
-                <select value={role} onChange={(e) => setRole(e.target.value)}>
-                    <option value="student">Student</option>
-                    <option value="teacher">Teacher</option>
-                    <option value="parent">Parent</option>
-                </select>
-
+                <p><label>First Name:<br />
+                    <input value={firstName} onChange={(e) => setFirstName(e.target.value)} required /></label></p>
+                <p><label>Last Name:<br />
+                    <input value={lastName} onChange={(e) => setLastName(e.target.value)} required /></label></p>
+                <p><label>Email:<br />
+                    <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required /></label></p>
+                <p><label>Password:<br />
+                    <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required /></label></p>
+                <p><label>Role:<br />
+                    <select value={role} onChange={(e) => setRole(e.target.value)}>
+                        <option value="student">Student</option>
+                        <option value="teacher">Teacher</option>
+                        <option value="parent">Parent</option>
+                    </select></label></p>
                 {role === 'student' && (
-                    <div>
-                        <label>Select Teacher/Parent:</label>
+                    <p><label>Your Teacher/Parent:<br />
                         <select value={teacherId} onChange={(e) => setTeacherId(e.target.value)} required>
-                            <option value="">Select a Teacher/Parent</option>
-                            {teachers.map(teacher => (
-                                <option key={teacher.id} value={teacher.id}>
-                                    {teacher.first_name} {teacher.last_name} ({teacher.role})
-                                </option>
+                            <option value="">Select one</option>
+                            {teachers.map(t => (
+                                <option key={t.id} value={t.id}>{t.name} ({t.role})</option>
                             ))}
-                        </select>
-                    </div>
+                        </select></label></p>
                 )}
-                
                 <button type="submit">Sign Up</button>
             </form>
-
-            <div className="login-link">
-                <p>Already have an account? <Link to="/login">Log in here</Link></p>
-            </div>
+            <p>Already have an account? <Link to="/login">Log in</Link></p>
         </div>
     );
-}
+};
 
 export default SignUp;

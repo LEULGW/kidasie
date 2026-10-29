@@ -1,138 +1,40 @@
-// src/components/StudentList.js
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
 import { Link, useNavigate } from 'react-router-dom';
-import './StudentList.css';
+import axios, { API_URL } from '../api';
 
 const StudentList = () => {
+    const navigate = useNavigate();
     const [students, setStudents] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
-    const navigate = useNavigate();
-
-    // NEW: teachers + selected teacher
-    const [teachers, setTeachers] = useState([]);
-    const [selectedTeacher, setSelectedTeacher] = useState("");
+    const [error, setError] = useState('');
 
     useEffect(() => {
-        const fetchStudents = async () => {
-            try {
-                const userId = localStorage.getItem('user_id');
-                if (!userId) {
-                    navigate('/login');
-                    return;
-                }
-
-                const response = await axios.get(`${process.env.REACT_APP_API_URL}/students`, {
-                    withCredentials: true,
-                    headers: {
-                        'Content-Type': 'application/json'
-                    }
-                });
-                
-                setStudents(response.data);
-                setLoading(false);
-            } catch (error) {
-                console.error("Failed to fetch students:", error);
-                if (error.response?.status === 401) {
-                    navigate('/login');
-                } else if (error.response?.status === 403) {
-                    setError("You don't have permission to view students.");
-                } else {
-                    setError("Failed to load students. Please try again later.");
-                }
-                setLoading(false);
-            }
-        };
-
-        fetchStudents();
+        axios.get(`${API_URL}/students`)
+            .then(res => setStudents(res.data))
+            .catch(err => {
+                if (err.response?.status === 401) navigate('/login');
+                else if (err.response?.status === 403) setError("You don't have permission to view students.");
+                else setError('Failed to load students.');
+            })
+            .finally(() => setLoading(false));
     }, [navigate]);
 
-    // NEW: fetch teachers
-    useEffect(() => {
-        const fetchTeachers = async () => {
-            try {
-                const response = await axios.get(`${process.env.REACT_APP_API_URL}/teachers`, {
-                    withCredentials: true,
-                    headers: { 'Content-Type': 'application/json' }
-                });
-                setTeachers(response.data);
-            } catch (err) {
-                console.error("Failed to fetch teachers:", err);
-            }
-        };
-
-        fetchTeachers();
-    }, []);
-
-    if (loading) {
-        return (
-            <div className="student-list-page">
-                <div className="student-list-container">
-                    <h2>My Students</h2>
-                    <p>Loading students...</p>
-                </div>
-            </div>
-        );
-    }
-
-    if (error) {
-        return (
-            <div className="student-list-page">
-                <div className="student-list-container">
-                    <h2>My Students</h2>
-                    <p className="error-message">{error}</p>
-                </div>
-            </div>
-        );
-    }
-
-    //  filter students by teacher
-    const filteredStudents = selectedTeacher
-        ? students.filter(s => s.teacher_id === parseInt(selectedTeacher))
-        : students;
+    if (loading) return <p style={{ padding: 20 }}>Loading students...</p>;
+    if (error) return <p style={{ padding: 20 }}>{error}</p>;
 
     return (
-        <div className="student-list-page">
-            <div className="student-list-container">
-                <h2>My Students</h2>
-
-                {/* NEW: Teacher dropdown */}
-                {teachers.length > 0 && (
-                    <div className="teacher-filter">
-                        <label htmlFor="teacherSelect">Filter by Teacher:</label>
-                        <select
-                            id="teacherSelect"
-                            value={selectedTeacher}
-                            onChange={(e) => setSelectedTeacher(e.target.value)}
-                        >
-                            <option value="">All Teachers</option>
-                            {teachers.map(teacher => (
-                                <option key={teacher.id} value={teacher.id}>
-                                    {teacher.name}
-                                </option>
-                            ))}
-                        </select>
-                    </div>
-                )}
-
-                {/* UPDATED: using filteredStudents */}
-                {filteredStudents.length > 0 ? (
-                    filteredStudents.map(student => (
-                        <div key={student.id} className="student-card">
-                            <h3>{student.name}</h3>
-                            <Link to={`/recordings/${student.id}`}>
-                                <button>View Recordings</button>
-                            </Link>
-                        </div>
-                    ))
-                ) : (
-                    <p>No students found</p>
-                )}
-            </div>
+        <div style={{ padding: 20 }}>
+            <h1>My Students</h1>
+            {students.length === 0 && <p>No students found.</p>}
+            <ul>
+                {students.map(s => (
+                    <li key={s.id}>
+                        {s.name} - <Link to={`/recordings/${s.id}`}>View Recordings</Link>
+                    </li>
+                ))}
+            </ul>
         </div>
     );
 };
 
 export default StudentList;
-

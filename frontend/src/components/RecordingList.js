@@ -1,95 +1,38 @@
-// src/components/RecordingList.js
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
-import { useParams, useNavigate } from 'react-router-dom';
-import './RecordingList.css';
+import { Link, useParams, useNavigate } from 'react-router-dom';
+import axios, { API_URL, fileUrl } from '../api';
 
 const RecordingList = () => {
     const { studentId } = useParams();
+    const navigate = useNavigate();
     const [recordings, setRecordings] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
-    const navigate = useNavigate();
+    const [error, setError] = useState('');
 
     useEffect(() => {
-        const fetchRecordings = async () => {
-            try {
-                const userId = localStorage.getItem('user_id');
-                if (!userId) {
-                    navigate('/login');
-                    return;
-                }
-
-                const response = await axios.get(
-                    `${process.env.REACT_APP_API_URL}/recordings/${studentId}`,
-                    {
-                        withCredentials: true,
-                        headers: {
-                            'Content-Type': 'application/json'
-                        }
-                    }
-                );
-                
-                const transformedRecordings = response.data.map(rec => ({
-                    ...rec,
-                    audio_url: `${process.env.REACT_APP_API_URL}/${rec.file_path}`
-                }));
-                
-                setRecordings(transformedRecordings);
-                setLoading(false);
-            } catch (error) {
-                console.error("Failed to fetch recordings:", error);
-                if (error.response?.status === 401) {
-                    navigate('/login');
-                } else {
-                    setError("Failed to load recordings. Please try again later.");
-                }
-                setLoading(false);
-            }
-        };
-
-        fetchRecordings();
+        axios.get(`${API_URL}/recordings/${studentId}`)
+            .then(res => setRecordings(res.data))
+            .catch(err => {
+                if (err.response?.status === 401) navigate('/login');
+                else setError('Failed to load recordings.');
+            })
+            .finally(() => setLoading(false));
     }, [studentId, navigate]);
 
-    if (loading) {
-        return <div className="recordings-page">Loading...</div>;
-    }
-
-    if (error) {
-        return <div>Error loading recordings: {error}</div>;
-    }
+    if (loading) return <p style={{ padding: 20 }}>Loading...</p>;
+    if (error) return <p style={{ padding: 20 }}>{error}</p>;
 
     return (
-        <div className="recording-list-page">
-            <div className="recording-list-container">
-                <h2>Recordings</h2>
-
-                {recordings.length > 0 ? (
-                    <ul>
-                        {recordings.map(rec => (
-                            <li key={rec.id}>
-                                <p>{rec.song_title}</p>
-                                <audio
-                                    controls
-                                    src={rec.audio_url}
-                                    onError={(e) => console.error('Audio loading error:', e)}
-                                >
-                                    <source src={rec.audio_url} type="audio/mpeg" />
-                                    Your browser does not support the audio element.
-                                </audio>
-                            </li>
-                        ))}
-                    </ul>
-                ) : (
-                    <p>No recordings found for this student</p>
-                )}
-
-                <button 
-                    onClick={() => navigate('/students')}
-                >
-                    Back to Student List
-                </button>
-            </div>
+        <div style={{ padding: 20, maxWidth: 700 }}>
+            <h1>Recordings</h1>
+            {recordings.length === 0 && <p>No recordings found for this student.</p>}
+            {recordings.map(rec => (
+                <div key={rec.id} style={{ marginBottom: 15 }}>
+                    <p><strong>{rec.song_title}</strong></p>
+                    <audio controls src={fileUrl(rec.file_path)} style={{ width: '100%' }} />
+                </div>
+            ))}
+            <Link to="/students">Back to Students</Link>
         </div>
     );
 };

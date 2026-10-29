@@ -1,85 +1,41 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
-import './Login.css';
+import React, { useState } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
+import axios, { API_URL } from '../api';
 
-const Login = ({ setIsLoggedIn }) => {
+const Login = ({ setIsLoggedIn, setRole }) => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const navigate = useNavigate();
 
-    const API_URL = process.env.REACT_APP_API_URL || 'https://kidasie-backend.onrender.com';
-
-    useEffect(() => {
-        localStorage.removeItem('user_id');
-        setIsLoggedIn(false);
-    }, [setIsLoggedIn]);
-
     const handleLogin = async (e) => {
         e.preventDefault();
         try {
-            const response = await axios.post(`${API_URL}/login`, {
-                email,
-                password
-            }, {
-                withCredentials: true,
-                headers: {
-                    'Content-Type': 'application/json'
-                }
-            });
-    
-            if (response.data.message === 'Login successful' && response.data.user_id) {
-                localStorage.setItem('user_id', response.data.user_id);
-                setIsLoggedIn(true);
-                navigate('/profile');
-            }
+            const res = await axios.post(`${API_URL}/login`, { email, password });
+            setIsLoggedIn(true);
+            setRole(res.data.role);
+            navigate('/profile');
         } catch (error) {
-            console.error('Login error:', error);
             alert('Login failed: ' + (error.response?.data?.message || 'Please try again'));
         }
     };
 
     return (
-        <div className="login-page">
-            <div className="login-container">
-                <h1>Login</h1>
-                <form onSubmit={handleLogin} className="space-y-4">
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700">Email:</label>
-                        <input 
-                            type="email" 
-                            value={email} 
-                            onChange={(e) => setEmail(e.target.value)}
-                            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                            required 
-                        />
-                    </div>
-                    
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700">Password:</label>
-                        <input 
-                            type="password" 
-                            value={password} 
-                            onChange={(e) => setPassword(e.target.value)}
-                            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                            required 
-                        />
-                    </div>
-                    
-                    <button 
-                        type="submit"
-                        className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                    >
-                        Login
-                    </button>
-                </form>
-                <p className="mt-4 text-center text-sm text-gray-600">
-                    Don't have an account? {' '}
-                    <a href="/signup" className="font-medium text-indigo-600 hover:text-indigo-500">
-                        Sign Up
-                    </a>
+        <div style={{ padding: 20, maxWidth: 400 }}>
+            <h1>Login</h1>
+            <form onSubmit={handleLogin}>
+                <p>
+                    <label>Email:<br />
+                        <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+                    </label>
                 </p>
-            </div>
+                <p>
+                    <label>Password:<br />
+                        <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
+                    </label>
+                </p>
+                <button type="submit">Login</button>
+            </form>
+            <p>Don't have an account? <Link to="/signup">Sign Up</Link></p>
         </div>
     );
 };

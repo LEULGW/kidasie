@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import axios, { API_URL } from './api';
 import Navbar from './components/Navbar';
 import Home from './components/Home';
 import Login from './components/Login';
@@ -9,44 +10,32 @@ import SongList from './components/SongList';
 import SongDetail from './components/SongDetail';
 import StudentList from './components/StudentList';
 import RecordingList from './components/RecordingList';
-import axios from 'axios';
-
-axios.defaults.withCredentials = true;
-
-const API_URL = process.env.REACT_APP_API_URL || 'https://kidasie-backend.onrender.com';
 
 function App() {
     const [isLoggedIn, setIsLoggedIn] = useState(false);
-    
+    const [role, setRole] = useState('');
+    const [checked, setChecked] = useState(false);
+
     useEffect(() => {
-        localStorage.removeItem('user_id');
-        setIsLoggedIn(false);
-
-        const checkLoginStatus = async () => {
-            try {
-                const response = await axios.get(`${API_URL}/check-session`, {
-                    withCredentials: true
-                });
-                if (response.data.isLoggedIn) {
-                    localStorage.setItem('user_id', response.data.userId);
-                    setIsLoggedIn(true);
-                }
-            } catch (error) {
-                console.log('No active session');
-                localStorage.removeItem('user_id');
-                setIsLoggedIn(false);
-            }
-        };
-
-        checkLoginStatus();
+        axios.get(`${API_URL}/check-session`)
+            .then(res => {
+                setIsLoggedIn(true);
+                setRole(res.data.role);
+            })
+            .catch(() => {})
+            .finally(() => setChecked(true));
     }, []);
+
+    if (!checked) {
+        return <p style={{ padding: 20 }}>Loading... (the server may take up to a minute to wake up)</p>;
+    }
 
     return (
         <Router>
-            <Navbar isLoggedIn={isLoggedIn} setIsLoggedIn={setIsLoggedIn} />
+            <Navbar isLoggedIn={isLoggedIn} role={role} setIsLoggedIn={setIsLoggedIn} setRole={setRole} />
             <Routes>
                 <Route path="/" element={<Home />} />
-                <Route path="/login" element={<Login setIsLoggedIn={setIsLoggedIn} />} />
+                <Route path="/login" element={<Login setIsLoggedIn={setIsLoggedIn} setRole={setRole} />} />
                 <Route path="/signup" element={<SignUp />} />
                 <Route path="/profile" element={<Profile />} />
                 <Route path="/songlist" element={<SongList />} />

@@ -1,59 +1,34 @@
-# backend/app.py
-
 from flask import Flask, request, jsonify, session
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_cors import CORS
-from waitress import serve
 from werkzeug.utils import secure_filename
-import os
 from datetime import timedelta
-
+import os, json
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 UPLOAD_FOLDER = os.path.join(basedir, 'static', 'recordings')
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+os.makedirs(os.path.join(basedir, 'instance'), exist_ok=True)
 
 app = Flask(__name__)
-app.secret_key = os.urandom(24)
-basedir = os.path.abspath(os.path.dirname(__file__))
+app.secret_key = os.environ.get('SECRET_KEY', 'dev-only-change-me')
 app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{os.path.join(basedir, "instance", "kidasie.db")}'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['SESSION_PERMANENT'] = True
-app.config['SESSION_TYPE'] = 'filesystem'
 app.config['SESSION_COOKIE_SAMESITE'] = 'None'
 app.config['SESSION_COOKIE_SECURE'] = True
-app.config[' SESSION_COOKIE_HTTPONLY']= True
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=1)
+app.config['SESSION_COOKIE_HTTPONLY'] = True
 app.config['SESSION_COOKIE_NAME'] = 'kidasie_session'
+app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=1)
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 db = SQLAlchemy(app)
 
-CORS(app,
-     resources={r"/*": {
-         "origins": ["https://kidasie-frontend.vercel.app"],
-         "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-         "allow_headers": ["Content-Type", "Authorization", "Access-Control-Allow-Credentials"],
-         "supports_credentials": True,
-         "expose_headers": ["Content-Type", "Authorization"],
-         "max_age": 600
-     }},
-     supports_credentials=True)
+CORS(app, origins=["https://kidasie-frontend.vercel.app"], supports_credentials=True)
 
-# Root route (index page)
 @app.route('/')
 def index():
     return "Welcome to the Kidasie backend app!"
-
-@app.route('/<path:path>', methods=['OPTIONS'])
-def handle_options(path):
-    response = jsonify({'message': 'CORS preflight successful'})
-    response.headers.add('Access-Control-Allow-Origin', 'https://kidasie-frontend.vercel.app')
-    response.headers.add('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS')
-    response.headers.add('Access-Control-Allow-Headers', 'Content-Type, Authorization')
-    response.headers.add('Access-Control-Allow-Credentials', 'true')
-    return response
 
 
 # User model
@@ -238,15 +213,6 @@ def check_session():
         'isLoggedIn': False
     }), 401
 
-@app.after_request
-def after_request(response):
-    origin = request.headers.get('Origin')
-    if origin == 'https://kidasie-frontend.vercel.app':
-        response.headers.add('Access-Control-Allow-Origin', origin)
-        response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization,Access-Control-Allow-Credentials')
-        response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS')
-        response.headers.add('Access-Control-Allow-Credentials', 'true')
-    return response
 
 
 # Song model (mock songs)
@@ -278,7 +244,7 @@ def get_song(song_id):
     song = Song.query.get(song_id)
     
     if song:
-        if current_user.role == 'teacher':
+        if current_user.role in ('teacher', 'parent'):
             student_ids = [student.id for student in current_user.students]
             recordings = Recording.query.filter(
                 Recording.song_id == song_id,
@@ -324,37 +290,28 @@ class Recording(db.Model):
 # Store a recording
 @app.route('/recordings', methods=['POST'])
 def create_recording():
-    print(f"Received user_id: {request.form.get('user_id')}, song_id: {request.form.get('song_id')}")
+    if 'user_id' not in session:
+        return jsonify({"message": "Not logged in"}), 401
     if 'audio_file' not in request.files:
         return jsonify({"message": "No file part"}), 400
 
     file = request.files['audio_file']
-
-    print(f"Received file with content type: {file.content_type}")
-
     if not file.filename.endswith('.webm'):
         return jsonify({"message": "Unsupported file format"}), 415
 
-    user_id = request.form.get('user_id')
+    user_id = session['user_id']
     song_id = request.form.get('song_id')
 
-    if file.filename == '':
-        return jsonify({"message": "No selected file"}), 400
+    filename = secure_filename(f"user_{user_id}_song_{song_id}.webm")
+    file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
 
-    if file:
-        filename = secure_filename(f"user_{user_id}_song_{song_id}.webm")
-        file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-        file.save(file_path)
-
-        new_recording = Recording(
-            user_id=user_id,
-            song_id=song_id,
-            file_path=f'static/recordings/{filename}'
-        )
-        db.session.add(new_recording)
+    # same filename gets overwritten, so don't create a duplicate row
+    path = f'static/recordings/{filename}'
+    if not Recording.query.filter_by(user_id=user_id, song_id=song_id).first():
+        db.session.add(Recording(user_id=user_id, song_id=song_id, file_path=path))
         db.session.commit()
+    return jsonify({"message": "Recording saved successfully!"}), 201
 
-        return jsonify({"message": "Recording saved successfully!"}), 201
 
 @app.route('/recordings/<int:recording_id>', methods=['DELETE'])
 def delete_recording(recording_id):
@@ -366,7 +323,7 @@ def delete_recording(recording_id):
         return jsonify({"message": "Recording not found or unauthorized"}), 404
 
     try:
-        os.remove(recording.file_path)
+        os.remove(os.path.join(basedir, recording.file_path))
     except FileNotFoundError:
         pass
 
@@ -376,48 +333,19 @@ def delete_recording(recording_id):
 
 def init_db():
     with app.app_context():
-        # Create tables
         db.create_all()
-        
-        # Add users
-        users = [
-            User(email="ermias@gmail.com", password=generate_password_hash("abebe"), 
-                 first_name="Ermias", last_name="Amelga", role="teacher"),
-            User(email="girum@gmail.com", password=generate_password_hash("abebe"), 
-                 first_name="Girum", last_name="Ermias", role="student", teacher_id=1),
-            User(email="teddy@gmail.com", password=generate_password_hash("abebe"), 
-                 first_name="Tewodros", last_name="Kassahun", role="student", teacher_id=1),
-            User(email="amanuel@gmail.com", password=generate_password_hash("abebe"), 
-                 first_name="Amanuel", last_name="Sertse", role="student", teacher_id=1)
-        ]
-        
-        # Only add if users don't exist
-        if not User.query.first():
-            db.session.add_all(users)
-            db.session.commit()
+        if User.query.first():
+            return
+        with open(os.path.join(basedir, 'database_content.json')) as f:
+            data = json.load(f)
+        for u in data['users']:
+            db.session.add(User(**u))
+        for s in data['songs']:
+            db.session.add(Song(**s))
+        db.session.commit()
 
-        # Add songs
-        songs_data = [
-            ("Be Aman Ab", "Awgchew"), ("Be Ente Btsue", "Awgchew"),
-            ("Buruk Ke Smu", "Awgchew"), ("Bekeme Mhretke", "Awgchew"),
-            ("Arhewu", "Awgchew"), ("Be Wengel Merahkene", "Awgchew"),
-            ("Egzio", "Awgchew"), ("Emne Beha", "Awgchew"),
-            ("Hale Luya Kumu", "Awgchew"), ("Kidus Hawarya", "Awgchew"),
-            ("Egziota-Etewu", "Awgchew"), ("Kidan", "Awgchew"),
-            ("Leab Weweld", "Awgchew"), ("Menu Yemesleke", "Awgchew"),
-            ("Tesetwo", "Awgchew")
-        ]
-        
-        # Only add if songs don't exist
-        if not Song.query.first():
-            songs = [Song(title=title, artist=artist, file_path=f"songs/{title.lower().replace(' ', '_')}.mp3") 
-                    for title, artist in songs_data]
-            db.session.add_all(songs)
-            db.session.commit()
+init_db()   # runs on gunicorn too
 
-# Run the app
 if __name__ == "__main__":
     port = int(os.environ.get('PORT', 10000))
-    with app.app_context():
-        init_db()
     app.run(host='0.0.0.0', port=port)

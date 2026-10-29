@@ -1,47 +1,32 @@
-// src/components/SongList.js
-
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import axios from 'axios';
-import './SongList.css';
+import axios, { API_URL } from '../api';
 
 const SongList = () => {
     const [songs, setSongs] = useState([]);
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        const fetchSongs = async () => {
-            try {
-            const response = await axios.get(`${process.env.REACT_APP_API_URL}/songs`, {
-                withCredentials: true,
-                headers: {
-                    'Content-Type': 'application/json',
-                }
-            });
-                console.log(response.data);
-                setSongs(response.data);
-            } catch (error) {
-                console.error("Error fetching songs:", error);
-            }
-        };        
-        fetchSongs();
-    }, []);    
+        axios.get(`${API_URL}/songs`)
+            .then(res => setSongs(res.data))
+            .catch(error => console.error('Error fetching songs:', error))
+            .finally(() => setLoading(false));
+    }, []);
+
+    if (loading) return <p style={{ padding: 20 }}>Loading songs...</p>;
 
     return (
-        <div className="songlist-container">
-            <h1 className="songlist-header">Song List</h1>
-            <ul className="songlist">
+        <div style={{ padding: 20 }}>
+            <h1>Song List</h1>
+            <ul>
                 {songs.map(song => (
-                    <li key={song.id} className="songlist-item">
-                        <Link to={`/songs/${song.id}`}>
-                            <div className="song-details">
-                                <span>{song.title} - {song.artist}</span>
-                            </div>
-                        </Link>
+                    <li key={song.id}>
+                        <Link to={`/songs/${song.id}`}>{song.title} - {song.artist}</Link>
                     </li>
                 ))}
             </ul>
         </div>
     );
-}
+};
 
 export default SongList;

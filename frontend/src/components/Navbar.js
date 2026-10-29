@@ -1,43 +1,41 @@
-// src/components/Navbar.js
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import axios from 'axios';
-import './Navbar.css';
+import axios, { API_URL } from '../api';
 
-const Navbar = ({ isLoggedIn, setIsLoggedIn }) => {
+const Navbar = ({ isLoggedIn, role, setIsLoggedIn, setRole }) => {
     const navigate = useNavigate();
 
     const handleLogout = async () => {
         try {
-            await axios.post(`${process.env.REACT_APP_API_URL}/logout`, {}, {
-                withCredentials: true
-            });
-            sessionStorage.removeItem('user_id');
-            setIsLoggedIn(false);
-            navigate('/login');
+            await axios.post(`${API_URL}/logout`);
         } catch (error) {
             console.error('Logout failed', error);
         }
+        setIsLoggedIn(false);
+        setRole('');
+        navigate('/login');
     };
 
+    const canSeeStudents = role === 'teacher' || role === 'parent';
+
     return (
-        <nav className="navbar">
-            <h1 className="navbar-title">Kidasie</h1>
-            <ul className="navbar-links">
-                <li><Link to="/" className="navbar-link">Home</Link></li>
-                {isLoggedIn ? (
-                    <>
-                        <li><Link to="/profile" className="navbar-link">Profile</Link></li>
-                        <li><Link to="/songlist" className="navbar-link">Songs</Link></li>
-                        <li><Link to="/students" className="navbar-link">Students</Link></li>
-                        <li>
-                            <button className="navbar-button" onClick={handleLogout}>Logout</button>
-                        </li>
-                    </>
-                ) : (
-                    <li><Link to="/login" className="navbar-link">Login</Link></li>
-                )}
-            </ul>
+        <nav style={{ padding: 10 }}>
+            <strong>Kidasie</strong>{' | '}
+            <Link to="/">Home</Link>{' | '}
+            {isLoggedIn ? (
+                <>
+                    <Link to="/profile">Profile</Link>{' | '}
+                    <Link to="/songlist">Songs</Link>{' | '}
+                    {canSeeStudents && <><Link to="/students">Students</Link>{' | '}</>}
+                    <button onClick={handleLogout}>Logout</button>
+                </>
+            ) : (
+                <>
+                    <Link to="/login">Login</Link>{' | '}
+                    <Link to="/signup">Sign Up</Link>
+                </>
+            )}
+            <hr />
         </nav>
     );
 };

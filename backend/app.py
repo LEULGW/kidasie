@@ -3,12 +3,14 @@ from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_cors import CORS
 from werkzeug.utils import secure_filename
-from datetime import timedelta
-import os, json
+from datetime import timedelta, datetime
+import os, json, time
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 UPLOAD_FOLDER = os.path.join(basedir, 'static', 'recordings')
+SONGS_FOLDER = os.path.join(basedir, 'static', 'songs')
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+os.makedirs(SONGS_FOLDER, exist_ok=True)
 os.makedirs(os.path.join(basedir, 'instance'), exist_ok=True)
 
 app = Flask(__name__)
@@ -176,7 +178,8 @@ def get_recordings_by_student(student_id):
         "id": rec.id,
         "song_id": rec.song_id,
         "song_title": rec.song.title,
-        "file_path": rec.file_path
+        "file_path": rec.file_path,
+        "feedback": feedback_list(rec)
     } for rec in recordings])
 
 
@@ -233,6 +236,39 @@ def get_songs():
                        for song in songs])
     return response
 
+# Teachers record a new song
+@app.route('/songs', methods=['POST'])
+def create_song():
+    if 'user_id' not in session:
+        return jsonify({"message": "Not logged in"}), 401
+
+    user = User.query.get(session['user_id'])
+    if not user or user.role != 'teacher':
+        return jsonify({"message": "Only teachers can add songs"}), 403
+
+    title = (request.form.get('title') or '').strip()
+    if not title:
+        return jsonify({"message": "Song name is required"}), 400
+    if 'audio_file' not in request.files:
+        return jsonify({"message": "No file part"}), 400
+
+    file = request.files['audio_file']
+    if not file.filename.endswith('.webm'):
+        return jsonify({"message": "Unsupported file format"}), 415
+
+    filename = secure_filename(f"teacher_{user.id}_{int(time.time())}.webm")
+    file.save(os.path.join(SONGS_FOLDER, filename))
+
+    song = Song(
+        title=title,
+        artist=f"{user.first_name} {user.last_name}",
+        file_path=f"/static/songs/{filename}"
+    )
+    db.session.add(song)
+    db.session.commit()
+    return jsonify({"message": "Song saved successfully!", "id": song.id}), 201
+
+
 # Get details for a single song
 @app.route('/songs/<int:song_id>', methods=['GET'])
 def get_song(song_id):
@@ -264,7 +300,8 @@ def get_song(song_id):
                 "user_id": recording.user_id,
                 "user_name": f"{user.first_name} {user.last_name}",
                 "file_path": recording.file_path,
-                "created_at": recording.created_at if hasattr(recording, 'created_at') else None
+                "created_at": recording.created_at if hasattr(recording, 'created_at') else None,
+                "feedback": feedback_list(recording)
             })
             
         return jsonify({
@@ -286,6 +323,54 @@ class Recording(db.Model):
 
     def __repr__(self):
         return f"<Recording {self.id} for song {self.song_id}>"
+
+
+# Feedback from a teacher/parent on a student's recording
+class Feedback(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    recording_id = db.Column(db.Integer, db.ForeignKey('recording.id'), nullable=False)
+    author_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    text = db.Column(db.String(1000), nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    author = db.relationship('User')
+    recording = db.relationship(
+        'Recording',
+        backref=db.backref('feedback', cascade='all, delete-orphan', order_by='Feedback.id')
+    )
+
+
+def feedback_list(rec):
+    return [{
+        "id": f.id,
+        "text": f.text,
+        "author": f"{f.author.first_name} {f.author.last_name}",
+        "role": f.author.role,
+        "created_at": f.created_at.strftime('%b %d, %Y') if f.created_at else ''
+    } for f in rec.feedback]
+
+
+# Give feedback on a recording (only the student's own teacher/parent)
+@app.route('/recordings/<int:recording_id>/feedback', methods=['POST'])
+def add_feedback(recording_id):
+    if 'user_id' not in session:
+        return jsonify({"message": "Not logged in"}), 401
+
+    user = User.query.get(session['user_id'])
+    recording = Recording.query.get(recording_id)
+    if not user or not recording:
+        return jsonify({"message": "Recording not found"}), 404
+
+    student = User.query.get(recording.user_id)
+    if user.role not in ('teacher', 'parent') or student.teacher_id != user.id:
+        return jsonify({"message": "Only this student's teacher or parent can give feedback"}), 403
+
+    text = ((request.get_json() or {}).get('text') or '').strip()
+    if not text:
+        return jsonify({"message": "Feedback can't be empty"}), 400
+
+    db.session.add(Feedback(recording_id=recording.id, author_id=user.id, text=text))
+    db.session.commit()
+    return jsonify({"message": "Feedback saved"}), 201
 
 # Store a recording
 @app.route('/recordings', methods=['POST'])

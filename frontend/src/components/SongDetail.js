@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios, { API_URL, fileUrl } from '../api';
+import Feedback from './Feedback';
 
 const SongDetail = () => {
     const { songId } = useParams();
@@ -104,6 +105,7 @@ const SongDetail = () => {
                     {!isStudent && <p>Student: {rec.user_name}</p>}
                     <audio controls src={`${fileUrl(rec.file_path)}?v=${version}`} style={{ width: '100%' }} />
                     {isStudent && <button onClick={() => deleteRecording(rec.id)}>Delete</button>}
+                    <Feedback recordingId={rec.id} feedback={rec.feedback} canPost={!isStudent} onPosted={fetchSong} />
                 </div>
             ))}
 

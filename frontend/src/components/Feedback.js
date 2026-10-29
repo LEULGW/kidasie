@@ -13,7 +13,11 @@ const Feedback = ({ recordingId, feedback = [], canPost, onPosted }) => {
             setText('');
             onPosted();
         } catch (error) {
-            alert('Failed to send feedback: ' + (error.response?.data?.message || 'Please try again'));
+            const status = error.response?.status;
+            alert('Failed to send feedback: ' + (
+                error.response?.data?.message ||
+                (status ? `server error (${status}), the backend may need to be redeployed` : 'could not reach the server')
+            ));
         } finally {
             setSending(false);
         }

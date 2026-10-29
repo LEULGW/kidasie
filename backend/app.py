@@ -26,7 +26,7 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 db = SQLAlchemy(app)
 
-CORS(app, origins=["https://kidasie-frontend.vercel.app", "http://localhost:3000"], supports_credentials=True)
+CORS(app, origins=[r"https://kidasie.*\.vercel\.app", "http://localhost:3000"], supports_credentials=True)
 
 @app.route('/')
 def index():
@@ -41,12 +41,24 @@ class User(db.Model):
     first_name = db.Column(db.String(100), nullable=False)
     last_name = db.Column(db.String(100), nullable=False)
     role = db.Column(db.String(50), nullable=False)
-    teacher_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)  # New field
+    teacher_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
+    parent_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
     students = db.relationship('User', backref=db.backref('teacher', remote_side=[id]),
                              foreign_keys=[teacher_id])
 
     def __repr__(self):
         return f"<User {self.first_name} {self.last_name}>"
+
+
+# students linked to a teacher (by teacher_id) or a parent (by parent_id)
+def my_students(user):
+    col = User.teacher_id if user.role == 'teacher' else User.parent_id
+    return User.query.filter(col == user.id).all()
+
+
+# True if `user` is the student themself or the student's teacher/parent
+def is_linked(user, student):
+    return user.id in (student.id, student.teacher_id, student.parent_id)
 
 # User registration
 @app.route('/signup', methods=['POST'])
@@ -67,8 +79,13 @@ def signup():
             role=data['role']
         )
 
-        if data['role'] == 'student' and 'teacher_id' in data:
-            new_user.teacher_id = data['teacher_id']
+        if data['role'] == 'student':
+            teacher = User.query.get(int(data.get('teacher_id') or 0))
+            parent = User.query.get(int(data.get('parent_id') or 0))
+            if not teacher or teacher.role != 'teacher' or not parent or parent.role != 'parent':
+                return jsonify({"message": "Please choose both a teacher and a parent"}), 400
+            new_user.teacher_id = teacher.id
+            new_user.parent_id = parent.id
 
         db.session.add(new_user)
         db.session.commit()
@@ -134,7 +151,7 @@ def get_students():
     if user.role not in ['teacher', 'parent']:
         return jsonify({"message": "Access denied"}), 403
 
-    students = User.query.filter_by(teacher_id=user.id).all()
+    students = my_students(user)
     student_data = []
 
     for student in students:
@@ -154,12 +171,14 @@ def get_students():
 
 @app.route('/teachers', methods=['GET'])
 def get_teachers():
-    teachers = User.query.filter(User.role.in_(['teacher', 'parent'])).all()
-    return jsonify([{
-        "id": teacher.id,
-        "name": f"{teacher.first_name} {teacher.last_name}",
-        "role": teacher.role
-    } for teacher in teachers])
+    teachers = User.query.filter_by(role='teacher').all()
+    return jsonify([{"id": t.id, "name": f"{t.first_name} {t.last_name}"} for t in teachers])
+
+
+@app.route('/parents', methods=['GET'])
+def get_parents():
+    parents = User.query.filter_by(role='parent').all()
+    return jsonify([{"id": p.id, "name": f"{p.first_name} {p.last_name}"} for p in parents])
 
 @app.route('/recordings/<int:student_id>', methods=['GET'])
 def get_recordings_by_student(student_id):
@@ -169,6 +188,10 @@ def get_recordings_by_student(student_id):
     student = User.query.get(student_id)
     if not student or student.role != 'student':
         return jsonify({"message": "Student not found"}), 404
+
+    viewer = User.query.get(session['user_id'])
+    if not viewer or not is_linked(viewer, student):
+        return jsonify({"message": "Access denied"}), 403
 
     recordings = Recording.query.filter_by(user_id=student_id).all()
     if not recordings:
@@ -281,7 +304,7 @@ def get_song(song_id):
     
     if song:
         if current_user.role in ('teacher', 'parent'):
-            student_ids = [student.id for student in current_user.students]
+            student_ids = [s.id for s in my_students(current_user)]
             recordings = Recording.query.filter(
                 Recording.song_id == song_id,
                 Recording.user_id.in_(student_ids)
@@ -361,7 +384,7 @@ def add_feedback(recording_id):
         return jsonify({"message": "Recording not found"}), 404
 
     student = User.query.get(recording.user_id)
-    if user.role not in ('teacher', 'parent') or student.teacher_id != user.id:
+    if user.role not in ('teacher', 'parent') or not is_linked(user, student):
         return jsonify({"message": "Only this student's teacher or parent can give feedback"}), 403
 
     text = ((request.get_json() or {}).get('text') or '').strip()

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import axios, { API_URL, fileUrl } from '../api';
 import Feedback from './Feedback';
+import { timeAgo, formatDateTime } from '../dates';
 
 const RecordingList = () => {
     const { studentId } = useParams();
@@ -37,7 +38,15 @@ const RecordingList = () => {
             {recordings.length === 0 && <p>No recordings found for this student.</p>}
             {recordings.map(rec => (
                 <div key={rec.id} style={{ marginBottom: 15 }}>
-                    <p><strong>{rec.song_title}</strong></p>
+                    <p>
+                        <strong>{rec.song_title}</strong>
+                        {rec.created_at && (
+                            <>
+                                <br />
+                                <small>Recorded {formatDateTime(rec.created_at)} ({timeAgo(rec.created_at)})</small>
+                            </>
+                        )}
+                    </p>
                     <audio controls src={fileUrl(rec.file_path)} style={{ width: '100%' }} />
                     <Feedback recordingId={rec.id} feedback={rec.feedback} canPost={canPost} onPosted={load} />
                 </div>

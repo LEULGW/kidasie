@@ -60,6 +60,20 @@ def my_students(user):
 def is_linked(user, student):
     return user.id in (student.id, student.teacher_id, student.parent_id)
 
+
+# a student counts as "practiced" if they recorded something in the last N days
+PRACTICE_WINDOW_DAYS = 7
+
+
+def iso(dt):
+    # datetimes are stored in UTC; the trailing Z tells the browser to convert to local time
+    return dt.isoformat() + 'Z' if dt else None
+
+
+def newest_first(recordings):
+    # newest first; old rows without a date go last
+    return sorted(recordings, key=lambda r: r.created_at or datetime.min, reverse=True)
+
 # User registration
 @app.route('/signup', methods=['POST'])
 def signup():
@@ -151,23 +165,33 @@ def get_students():
     if user.role not in ['teacher', 'parent']:
         return jsonify({"message": "Access denied"}), 403
 
-    students = my_students(user)
+    since = datetime.utcnow() - timedelta(days=PRACTICE_WINDOW_DAYS)
     student_data = []
 
-    for student in students:
-        recordings = Recording.query.filter_by(user_id=student.id).all()
+    for student in my_students(user):
+        recordings = newest_first(Recording.query.filter_by(user_id=student.id).all())
+        dated = [r.created_at for r in recordings if r.created_at]
+        this_week = [d for d in dated if d >= since]
         student_data.append({
             "id": student.id,
             "name": f"{student.first_name} {student.last_name}",
+            "last_practiced": iso(max(dated)) if dated else None,
+            "practiced_this_week": len(this_week) > 0,
+            "recordings_this_week": len(this_week),
+            "total_recordings": len(recordings),
             "recordings": [{
                 "id": rec.id,
                 "song_id": rec.song_id,
                 "song_title": rec.song.title,
-                "file_path": rec.file_path
+                "file_path": rec.file_path,
+                "created_at": iso(rec.created_at)
             } for rec in recordings]
         })
 
-    return jsonify(student_data)
+    return jsonify({
+        "window_days": PRACTICE_WINDOW_DAYS,
+        "students": student_data
+    })
 
 @app.route('/teachers', methods=['GET'])
 def get_teachers():
@@ -193,7 +217,7 @@ def get_recordings_by_student(student_id):
     if not viewer or not is_linked(viewer, student):
         return jsonify({"message": "Access denied"}), 403
 
-    recordings = Recording.query.filter_by(user_id=student_id).all()
+    recordings = newest_first(Recording.query.filter_by(user_id=student_id).all())
     if not recordings:
         return jsonify([]), 200
 
@@ -202,6 +226,7 @@ def get_recordings_by_student(student_id):
         "song_id": rec.song_id,
         "song_title": rec.song.title,
         "file_path": rec.file_path,
+        "created_at": iso(rec.created_at),
         "feedback": feedback_list(rec)
     } for rec in recordings])
 
@@ -323,7 +348,7 @@ def get_song(song_id):
                 "user_id": recording.user_id,
                 "user_name": f"{user.first_name} {user.last_name}",
                 "file_path": recording.file_path,
-                "created_at": recording.created_at if hasattr(recording, 'created_at') else None,
+                "created_at": iso(recording.created_at),
                 "feedback": feedback_list(recording)
             })
             
@@ -342,6 +367,8 @@ class Recording(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     song_id = db.Column(db.Integer, db.ForeignKey('song.id'), nullable=False)
     file_path = db.Column(db.String(200), nullable=False)
+    # when the student last recorded this song (UTC); used for the practice dashboard
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
     song = db.relationship('Song', backref='recordings')
 
     def __repr__(self):
@@ -413,11 +440,15 @@ def create_recording():
     filename = secure_filename(f"user_{user_id}_song_{song_id}.webm")
     file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
 
-    # same filename gets overwritten, so don't create a duplicate row
+    # same filename gets overwritten, so don't create a duplicate row;
+    # just refresh the date so a re-recording counts as new practice
     path = f'static/recordings/{filename}'
-    if not Recording.query.filter_by(user_id=user_id, song_id=song_id).first():
+    existing = Recording.query.filter_by(user_id=user_id, song_id=song_id).first()
+    if existing:
+        existing.created_at = datetime.utcnow()
+    else:
         db.session.add(Recording(user_id=user_id, song_id=song_id, file_path=path))
-        db.session.commit()
+    db.session.commit()
     return jsonify({"message": "Recording saved successfully!"}), 201
 
 
@@ -442,6 +473,11 @@ def delete_recording(recording_id):
 def init_db():
     with app.app_context():
         db.create_all()
+        # databases created before the practice dashboard have no created_at column
+        cols = [row[1] for row in db.session.execute(db.text("PRAGMA table_info(recording)"))]
+        if 'created_at' not in cols:
+            db.session.execute(db.text("ALTER TABLE recording ADD COLUMN created_at DATETIME"))
+            db.session.commit()
         if User.query.first():
             return
         with open(os.path.join(basedir, 'database_content.json')) as f:

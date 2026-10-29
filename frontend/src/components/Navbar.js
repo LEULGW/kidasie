@@ -19,23 +19,24 @@ const Navbar = ({ isLoggedIn, role, setIsLoggedIn, setRole }) => {
     const canSeeStudents = role === 'teacher' || role === 'parent';
 
     return (
-        <nav style={{ padding: 10 }}>
-            <strong>Kidasie</strong>{' | '}
-            <Link to="/">Home</Link>{' | '}
-            {isLoggedIn ? (
-                <>
-                    <Link to="/profile">Profile</Link>{' | '}
-                    <Link to="/songlist">Songs</Link>{' | '}
-                    {canSeeStudents && <><Link to="/students">Students</Link>{' | '}</>}
-                    <button onClick={handleLogout}>Logout</button>
-                </>
-            ) : (
-                <>
-                    <Link to="/login">Login</Link>{' | '}
-                    <Link to="/signup">Sign Up</Link>
-                </>
-            )}
-            <hr />
+        <nav className="nav">
+            <span className="brand">Kidasie</span>
+            <div className="nav-links">
+                <Link to="/">Home</Link>
+                {isLoggedIn ? (
+                    <>
+                        <Link to="/profile">Profile</Link>
+                        <Link to="/songlist">Songs</Link>
+                        {canSeeStudents && <Link to="/students">Students</Link>}
+                        <button onClick={handleLogout}>Logout</button>
+                    </>
+                ) : (
+                    <>
+                        <Link to="/login">Login</Link>
+                        <Link to="/signup">Sign Up</Link>
+                    </>
+                )}
+            </div>
         </nav>
     );
 };

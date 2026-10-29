@@ -29,7 +29,8 @@ const StudentList = () => {
             <ul>
                 {students.map(s => (
                     <li key={s.id}>
-                        {s.name} - <Link to={`/recordings/${s.id}`}>View Recordings</Link>
+                        <span>{s.name}</span>
+                        <Link to={`/recordings/${s.id}`}>View Recordings</Link>
                     </li>
                 ))}
             </ul>

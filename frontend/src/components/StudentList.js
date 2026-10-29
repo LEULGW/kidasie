@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios, { API_URL } from '../api';
-import { timeAgo } from '../dates';
+import { timeAgo } from '../Dates';
 
 const StudentList = () => {
     const navigate = useNavigate();
